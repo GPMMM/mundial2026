@@ -34,8 +34,8 @@ export function CampeaoForm({ campeaoAtual, campeaoIdAtual, equipas }: Props) {
 
   return (
     <section>
-      <h2 className="font-bold text-lg mb-1">🏆 Previsão do Campeão</h2>
-      <p className="text-muted text-xs mb-3">Acerta e ganhas +20 pontos bónus!</p>
+      <h2 className="font-bold text-lg mb-1">🏆 Champion Prediction</h2>
+      <p className="text-muted text-xs mb-3">Get it right and earn +20 bonus points!</p>
 
       <form onSubmit={handleSubmit} className="bg-surface rounded-xl border border-border p-4 space-y-3">
         {selected && selected.id && (
@@ -57,7 +57,7 @@ export function CampeaoForm({ campeaoAtual, campeaoIdAtual, equipas }: Props) {
           }}
           className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold"
         >
-          <option value="">Escolher equipa…</option>
+          <option value="">Choose team…</option>
           {equipas.map(eq => (
             <option key={eq.nome} value={eq.nome}>{eq.nome}</option>
           ))}
@@ -65,13 +65,13 @@ export function CampeaoForm({ campeaoAtual, campeaoIdAtual, equipas }: Props) {
 
         <input type="hidden" name="campeaoId" value={selected?.id ?? ''} />
 
-        {saved && <p className="text-green text-sm">✅ Guardado!</p>}
+        {saved && <p className="text-green text-sm">✅ Saved!</p>}
 
         <button
           type="submit" disabled={isPending}
           className="w-full py-2.5 text-sm bg-gold text-dark font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50"
         >
-          {isPending ? 'A guardar…' : 'Guardar previsão'}
+          {isPending ? 'Saving…' : 'Save prediction'}
         </button>
       </form>
     </section>

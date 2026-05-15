@@ -6,13 +6,13 @@ import { Providers } from '@/components/providers'
 const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 
 export const metadata: Metadata = {
-  title: 'Mundial 2026 — Bolão',
-  description: 'Prevê os resultados do Mundial 2026 e compete com os teus amigos.',
+  title: 'World Cup 2026 — Predictions',
+  description: 'Predict the World Cup 2026 results and compete with your friends.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt" className={`${geist.variable} h-full`}>
+    <html lang="en-GB" className={`${geist.variable} h-full`}>
       <body className="min-h-dvh bg-dark text-white antialiased">
         <Providers>{children}</Providers>
       </body>

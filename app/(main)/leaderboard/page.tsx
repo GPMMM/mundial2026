@@ -22,7 +22,7 @@ async function getFullLeaderboard() {
       })
       return {
         userId: p.userId,
-        nome: userMap[p.userId]?.nome ?? 'Utilizador',
+        nome: userMap[p.userId]?.nome ?? 'User',
         imagem: userMap[p.userId]?.imagem ?? null,
         totalPontos: p._sum.pontos ?? 0,
         totalPrevisoes: p._count.id,
@@ -40,8 +40,8 @@ export default async function LeaderboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black">🏅 Classificação Geral</h1>
-        <p className="text-muted text-sm mt-1">{entradas.length} participantes</p>
+        <h1 className="text-2xl font-black">🏅 Overall Standings</h1>
+        <p className="text-muted text-sm mt-1">{entradas.length} players</p>
       </div>
 
       <TabelaLeaderboard entradas={entradas} destaqueUserId={session?.user?.id} />

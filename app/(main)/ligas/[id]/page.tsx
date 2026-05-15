@@ -57,7 +57,7 @@ export default async function LigaDetailPage({ params }: Props) {
   const leaderboard = [
     ...previsoes.map(p => ({
       userId: p.userId,
-      nome: userMap[p.userId]?.nome ?? 'Utilizador',
+      nome: userMap[p.userId]?.nome ?? 'User',
       imagem: userMap[p.userId]?.imagem ?? null,
       totalPontos: p._sum.pontos ?? 0,
       totalPrevisoes: p._count.id,
@@ -65,7 +65,7 @@ export default async function LigaDetailPage({ params }: Props) {
     })),
     ...semPrevisoes.map(uid => ({
       userId: uid,
-      nome: userMap[uid]?.nome ?? 'Utilizador',
+      nome: userMap[uid]?.nome ?? 'User',
       imagem: userMap[uid]?.imagem ?? null,
       totalPontos: 0,
       totalPrevisoes: 0,
@@ -78,12 +78,12 @@ export default async function LigaDetailPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-black">{liga.nome}</h1>
         {liga.descricao && <p className="text-muted mt-1">{liga.descricao}</p>}
-        <p className="text-xs text-muted mt-1">Criada por {liga.criador.nome}</p>
+        <p className="text-xs text-muted mt-1">Created by {liga.criador.nome}</p>
       </div>
 
       {/* Link de convite */}
       <div className="bg-surface rounded-xl border border-border p-4">
-        <p className="text-xs text-muted mb-2">Link de convite</p>
+        <p className="text-xs text-muted mb-2">Invite link</p>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-surface-2 rounded-lg px-3 py-2 text-sm font-mono break-all">
             {linkConvite}
@@ -92,13 +92,13 @@ export default async function LigaDetailPage({ params }: Props) {
         </div>
 
         <p className="text-xs text-muted mt-1">
-          Código: <span className="font-mono text-white font-bold">{liga.codigoConvite}</span>
+          Code: <span className="font-mono text-white font-bold">{liga.codigoConvite}</span>
         </p>
       </div>
 
       {/* Leaderboard */}
       <section>
-        <h2 className="font-bold text-lg mb-3">Classificação</h2>
+        <h2 className="font-bold text-lg mb-3">Standings</h2>
         <TabelaLeaderboard entradas={leaderboard} destaqueUserId={session.user.id} />
       </section>
 
@@ -119,7 +119,7 @@ export default async function LigaDetailPage({ params }: Props) {
                   )}
                   <span className="text-sm">{m.user.nome}</span>
                   {m.userId === liga.criadorId && (
-                    <span className="text-xs bg-gold/20 text-gold px-1.5 py-0.5 rounded-full">Criador</span>
+                    <span className="text-xs bg-gold/20 text-gold px-1.5 py-0.5 rounded-full">Owner</span>
                   )}
                 </div>
                 {m.userId !== liga.criadorId && m.userId !== session.user.id && (

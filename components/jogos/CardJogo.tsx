@@ -23,7 +23,7 @@ function TeamLogo({ id, name }: { id: number | null; name: string }) {
 }
 
 export function CardJogo({ jogo, previsao, isLive }: Props) {
-  const dataFormatada = new Date(jogo.data).toLocaleString('pt-PT', {
+  const dataFormatada = new Date(jogo.data).toLocaleString('en-GB', {
     day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
   })
 
@@ -35,11 +35,11 @@ export function CardJogo({ jogo, previsao, isLive }: Props) {
         {isLive && (
           <span className="absolute top-2 right-2 flex items-center gap-1 text-xs text-green font-semibold">
             <span className="w-2 h-2 rounded-full bg-green pulse-live" />
-            AO VIVO
+            LIVE
           </span>
         )}
         {jogo.grupo && (
-          <div className="text-xs text-muted mb-2">Grupo {jogo.grupo}</div>
+          <div className="text-xs text-muted mb-2">Group {jogo.grupo}</div>
         )}
 
         <div className="flex items-center gap-3">
@@ -68,7 +68,7 @@ export function CardJogo({ jogo, previsao, isLive }: Props) {
         {previsao && (
           <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-xs">
             <span className="text-muted">
-              Tua previsão: <span className="text-white font-semibold">{previsao.golosCasa} – {previsao.golosFora}</span>
+              Your prediction: <span className="text-white font-semibold">{previsao.golosCasa} – {previsao.golosFora}</span>
             </span>
             {previsao.pontos != null && (
               <span className={`font-bold ${previsao.pontos > 0 ? 'text-green' : 'text-muted'}`}>

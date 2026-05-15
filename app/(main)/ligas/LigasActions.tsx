@@ -37,30 +37,30 @@ export function LigasActions() {
           onClick={() => setShow(v => v === 'entrar' ? null : 'entrar')}
           className="text-sm border border-border px-3 py-2 rounded-lg hover:bg-surface-2 transition-colors"
         >
-          Entrar com código
+          Join with code
         </button>
         <button
           onClick={() => setShow(v => v === 'criar' ? null : 'criar')}
           className="text-sm bg-gold text-dark font-semibold px-3 py-2 rounded-lg hover:bg-gold/90 transition-colors"
         >
-          + Criar liga
+          + Create league
         </button>
       </div>
 
       {show === 'criar' && (
         <form onSubmit={handleCriar} className="bg-surface rounded-xl border border-gold/40 p-4 space-y-3">
-          <h3 className="font-semibold">Nova liga</h3>
-          <input name="nome" placeholder="Nome da liga" required
+          <h3 className="font-semibold">New league</h3>
+          <input name="nome" placeholder="League name" required
             className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold" />
-          <textarea name="descricao" placeholder="Descrição (opcional)" rows={2}
+          <textarea name="descricao" placeholder="Description (optional)" rows={2}
             className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold resize-none" />
           {errorCriar && <p className="text-red text-xs">{errorCriar}</p>}
           <div className="flex gap-2">
             <button type="button" onClick={() => setShow(null)}
-              className="flex-1 py-2 text-sm border border-border rounded-lg hover:bg-surface-2">Cancelar</button>
+              className="flex-1 py-2 text-sm border border-border rounded-lg hover:bg-surface-2">Cancel</button>
             <button type="submit" disabled={pendingCriar}
               className="flex-1 py-2 text-sm bg-gold text-dark font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50">
-              {pendingCriar ? 'A criar…' : 'Criar'}
+              {pendingCriar ? 'Creating…' : 'Create'}
             </button>
           </div>
         </form>
@@ -68,16 +68,16 @@ export function LigasActions() {
 
       {show === 'entrar' && (
         <form onSubmit={handleEntrar} className="bg-surface rounded-xl border border-border p-4 space-y-3">
-          <h3 className="font-semibold">Entrar com código</h3>
-          <input name="codigo" placeholder="Código de convite (ex: AB3XY7)" required maxLength={6}
+          <h3 className="font-semibold">Join with code</h3>
+          <input name="codigo" placeholder="Invite code (e.g. AB3XY7)" required maxLength={6}
             className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm font-mono uppercase focus:outline-none focus:border-gold" />
           {errorEntrar && <p className="text-red text-xs">{errorEntrar}</p>}
           <div className="flex gap-2">
             <button type="button" onClick={() => setShow(null)}
-              className="flex-1 py-2 text-sm border border-border rounded-lg hover:bg-surface-2">Cancelar</button>
+              className="flex-1 py-2 text-sm border border-border rounded-lg hover:bg-surface-2">Cancel</button>
             <button type="submit" disabled={pendingEntrar}
               className="flex-1 py-2 text-sm bg-gold text-dark font-semibold rounded-lg hover:bg-gold/90 disabled:opacity-50">
-              {pendingEntrar ? 'A entrar…' : 'Entrar'}
+              {pendingEntrar ? 'Joining…' : 'Join'}
             </button>
           </div>
         </form>

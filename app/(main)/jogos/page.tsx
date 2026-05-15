@@ -4,10 +4,10 @@ import { CardJogo } from '@/components/jogos/CardJogo'
 import type { Fase } from '@prisma/client'
 
 const FASE_LABEL: Record<Fase, string> = {
-  GRUPOS: 'Fase de Grupos',
-  OITAVOS: 'Oitavos de Final',
-  QUARTOS: 'Quartos de Final',
-  MEIAS: 'Meias-Finais',
+  GRUPOS: 'Group Stage',
+  OITAVOS: 'Round of 16',
+  QUARTOS: 'Quarter-finals',
+  MEIAS: 'Semi-finals',
   FINAL: 'Final',
 }
 
@@ -33,7 +33,7 @@ export default async function JogosPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-black">⚽ Jogos</h1>
+      <h1 className="text-2xl font-black">⚽ Matches</h1>
 
       {FASE_ORDER.map(fase => {
         const jogosFase = byFase[fase]
@@ -42,7 +42,7 @@ export default async function JogosPage() {
         if (fase === 'GRUPOS') {
           const byGrupo: Record<string, typeof jogos> = {}
           for (const j of jogosFase) {
-            const g = j.grupo ?? 'Sem Grupo'
+            const g = j.grupo ?? 'No Group'
             if (!byGrupo[g]) byGrupo[g] = []
             byGrupo[g].push(j)
           }
@@ -52,7 +52,7 @@ export default async function JogosPage() {
               <div className="space-y-6">
                 {Object.entries(byGrupo).sort(([a], [b]) => a.localeCompare(b)).map(([grupo, gs]) => (
                   <div key={grupo}>
-                    <h3 className="text-sm font-semibold text-muted uppercase mb-2">Grupo {grupo}</h3>
+                    <h3 className="text-sm font-semibold text-muted uppercase mb-2">Group {grupo}</h3>
                     <div className="space-y-2">
                       {gs.map(j => (
                         <CardJogo
@@ -88,7 +88,7 @@ export default async function JogosPage() {
       {jogos.length === 0 && (
         <div className="text-center py-16 text-muted">
           <p className="text-4xl mb-3">⚽</p>
-          <p>Os jogos serão sincronizados em breve.</p>
+          <p>Matches will be synced shortly.</p>
         </div>
       )}
     </div>

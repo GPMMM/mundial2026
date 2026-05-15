@@ -20,17 +20,17 @@ export default async function AdminPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black">⚙️ Administração</h1>
-        <p className="text-muted text-sm mt-1">Painel de controlo</p>
+        <h1 className="text-2xl font-black">⚙️ Administration</h1>
+        <p className="text-muted text-sm mt-1">Control panel</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Utilizadores', value: users.length },
-          { label: 'Jogos', value: totalJogos },
-          { label: 'Encerrados', value: jogosSincronizados },
-          { label: 'Previsões', value: totalPrevisoes },
+          { label: 'Users', value: users.length },
+          { label: 'Matches', value: totalJogos },
+          { label: 'Finished', value: jogosSincronizados },
+          { label: 'Predictions', value: totalPrevisoes },
         ].map(s => (
           <div key={s.label} className="bg-surface rounded-xl border border-border p-4 text-center">
             <div className="text-2xl font-black text-gold">{s.value}</div>
@@ -41,14 +41,14 @@ export default async function AdminPage() {
 
       {/* Sync */}
       <section className="bg-surface rounded-xl border border-border p-5">
-        <h2 className="font-bold mb-1">Sincronização manual</h2>
-        <p className="text-muted text-xs mb-4">Força sincronização de jogos e cálculo de pontos via API-Football.</p>
+        <h2 className="font-bold mb-1">Manual sync</h2>
+        <p className="text-muted text-xs mb-4">Force match sync and points calculation via API-Football.</p>
         <SyncButton action={forceSyncAction} />
       </section>
 
       {/* Users */}
       <section>
-        <h2 className="font-bold text-lg mb-3">Utilizadores ({users.length})</h2>
+        <h2 className="font-bold text-lg mb-3">Users ({users.length})</h2>
         <div className="rounded-xl overflow-hidden border border-border">
           <table className="w-full">
             <thead>
@@ -82,7 +82,7 @@ export default async function AdminPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-xs text-muted">
-                    {new Date(u.criadoEm).toLocaleDateString('pt-PT')}
+                    {new Date(u.criadoEm).toLocaleDateString('en-GB')}
                   </td>
                   <td className="px-4 py-3">
                     {u.id !== session.user.id && (
@@ -91,7 +91,7 @@ export default async function AdminPage() {
                         await alterarRole(u.id, u.role === 'ADMIN' ? 'USER' : 'ADMIN')
                       }}>
                         <button type="submit" className="text-xs text-muted hover:text-white transition-colors">
-                          {u.role === 'ADMIN' ? 'Remover ADMIN' : 'Tornar ADMIN'}
+                          {u.role === 'ADMIN' ? 'Remove ADMIN' : 'Make ADMIN'}
                         </button>
                       </form>
                     )}

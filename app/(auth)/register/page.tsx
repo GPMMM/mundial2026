@@ -20,11 +20,11 @@ export default function RegisterPage() {
 
   return (
     <div className="bg-surface rounded-2xl border border-border p-6 space-y-4">
-      <h2 className="font-bold text-xl">Criar conta</h2>
+      <h2 className="font-bold text-xl">Create account</h2>
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <input
-          name="nome" type="text" placeholder="Nome" required
+          name="nome" type="text" placeholder="Name" required
           className="w-full bg-surface-2 border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-gold transition-colors"
         />
         <input
@@ -32,7 +32,7 @@ export default function RegisterPage() {
           className="w-full bg-surface-2 border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-gold transition-colors"
         />
         <input
-          name="password" type="password" placeholder="Password (mín. 6 caracteres)" required minLength={6}
+          name="password" type="password" placeholder="Password (min. 6 characters)" required minLength={6}
           className="w-full bg-surface-2 border border-border rounded-lg px-4 py-3 focus:outline-none focus:border-gold transition-colors"
         />
         {error && <p className="text-red text-sm">{error}</p>}
@@ -40,13 +40,13 @@ export default function RegisterPage() {
           type="submit" disabled={isPending}
           className="w-full bg-gold text-dark font-bold py-3 rounded-xl hover:bg-gold/90 transition-colors disabled:opacity-50"
         >
-          {isPending ? 'A criar…' : 'Criar conta'}
+          {isPending ? 'Creating…' : 'Create account'}
         </button>
       </form>
 
       <p className="text-center text-sm text-muted">
-        Já tens conta?{' '}
-        <Link href="/login" className="text-gold hover:underline">Iniciar sessão</Link>
+        Already have an account?{' '}
+        <Link href="/login" className="text-gold hover:underline">Sign in</Link>
       </p>
     </div>
   )

@@ -3,7 +3,6 @@
 import bcrypt from 'bcryptjs'
 import { prisma } from '../prisma'
 import { signIn } from '../auth'
-import { redirect } from 'next/navigation'
 import { AuthError } from 'next-auth'
 
 export async function registar(formData: FormData) {
@@ -11,11 +10,11 @@ export async function registar(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  if (!nome || !email || !password) return { error: 'Preenche todos os campos.' }
-  if (password.length < 6) return { error: 'Password com mínimo 6 caracteres.' }
+  if (!nome || !email || !password) return { error: 'Please fill in all fields.' }
+  if (password.length < 6) return { error: 'Password must be at least 6 characters.' }
 
   const existe = await prisma.user.findUnique({ where: { email } })
-  if (existe) return { error: 'Email já registado.' }
+  if (existe) return { error: 'Email already registered.' }
 
   const hash = await bcrypt.hash(password, 12)
   await prisma.user.create({ data: { nome, email, password: hash } })
@@ -31,7 +30,7 @@ export async function entrar(formData: FormData) {
       redirectTo: '/',
     })
   } catch (e) {
-    if (e instanceof AuthError) return { error: 'Credenciais inválidas.' }
+    if (e instanceof AuthError) return { error: 'Invalid credentials.' }
     throw e
   }
 }

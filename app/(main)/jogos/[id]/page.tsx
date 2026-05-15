@@ -11,7 +11,7 @@ interface Props {
 }
 
 const FASE_LABEL: Record<string, string> = {
-  GRUPOS: 'Fase de Grupos', OITAVOS: 'Oitavos', QUARTOS: 'Quartos', MEIAS: 'Meias-Finais', FINAL: 'Final',
+  GRUPOS: 'Group Stage', OITAVOS: 'Round of 16', QUARTOS: 'Quarter-finals', MEIAS: 'Semi-finals', FINAL: 'Final',
 }
 
 function TeamLogo({ id, name, size = 64 }: { id: number | null; name: string; size?: number }) {
@@ -72,8 +72,8 @@ export default async function JogoDetailPage({ params }: Props) {
       {/* Header do jogo */}
       <div className="bg-surface rounded-2xl border border-border p-6">
         <div className="flex items-center justify-between text-xs text-muted mb-4">
-          <span>{FASE_LABEL[jogo.fase]}{jogo.grupo ? ` — Grupo ${jogo.grupo}` : ''}</span>
-          <span>{new Date(jogo.data).toLocaleString('pt-PT', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}</span>
+          <span>{FASE_LABEL[jogo.fase]}{jogo.grupo ? ` — Group ${jogo.grupo}` : ''}</span>
+          <span>{new Date(jogo.data).toLocaleString('en-GB', { day: '2-digit', month: 'long', hour: '2-digit', minute: '2-digit' })}</span>
         </div>
 
         <div className="flex items-center gap-4 justify-center">
@@ -94,7 +94,7 @@ export default async function JogoDetailPage({ params }: Props) {
             {jogoComecou && !jogo.encerrado && (
               <span className="text-xs text-green font-semibold flex items-center gap-1 mt-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-green pulse-live" />
-                AO VIVO
+                LIVE
               </span>
             )}
           </div>
@@ -118,7 +118,7 @@ export default async function JogoDetailPage({ params }: Props) {
         )}
       </div>
 
-      {/* Formulário de previsão */}
+      {/* Prediction form */}
       {session?.user ? (
         <FormPrevisao
           jogoId={jogo.id}
@@ -132,15 +132,15 @@ export default async function JogoDetailPage({ params }: Props) {
       ) : (
         <div className="bg-surface rounded-xl border border-border p-4 text-center">
           <p className="text-muted text-sm">
-            <a href="/login" className="text-gold hover:underline">Inicia sessão</a> para fazer a tua previsão
+            <a href="/login" className="text-gold hover:underline">Sign in</a> to make your prediction
           </p>
         </div>
       )}
 
-      {/* Previsões dos outros (após início do jogo) */}
+      {/* Other predictions (after match starts) */}
       {jogoComecou && outrasPrevisoes.length > 0 && (
         <section>
-          <h3 className="font-bold mb-3">Previsões dos participantes</h3>
+          <h3 className="font-bold mb-3">Participants' predictions</h3>
           <div className="space-y-2">
             {outrasPrevisoes.map(p => (
               <div key={p.id} className="bg-surface rounded-xl border border-border px-4 py-3 flex items-center justify-between">

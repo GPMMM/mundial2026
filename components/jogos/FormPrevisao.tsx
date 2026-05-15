@@ -46,7 +46,7 @@ export function FormPrevisao({
   if (fechado) {
     return (
       <div className="bg-surface-2 rounded-xl p-4 border border-border text-center text-muted text-sm">
-        🔒 Previsões fechadas — jogo já começou
+        🔒 Predictions closed — match has started
       </div>
     )
   }
@@ -55,7 +55,7 @@ export function FormPrevisao({
     <>
       <Confetti trigger={confetti} onDone={() => setConfetti(false)} />
       <form onSubmit={handleSubmit} className="bg-surface rounded-xl border border-border p-5 space-y-5">
-        <h3 className="font-bold text-lg">A tua previsão</h3>
+        <h3 className="font-bold text-lg">Your prediction</h3>
 
         <div className="flex items-center gap-4 justify-center">
           <div className="flex-1 text-right">
@@ -82,24 +82,24 @@ export function FormPrevisao({
         {(jogadoresCasa.length > 0 || jogadoresFora.length > 0) && (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs text-muted mb-1">Marcador {equipaCasa}</label>
+              <label className="block text-xs text-muted mb-1">Goalscorer {equipaCasa}</label>
               <select
                 name="marcadorCasa" value={mCasa} onChange={e => setMCasa(e.target.value)}
                 className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold"
               >
-                <option value="">Nenhum</option>
+                <option value="">None</option>
                 {jogadoresCasa.map(j => (
                   <option key={j.id} value={j.name}>{j.number}. {j.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-xs text-muted mb-1">Marcador {equipaFora}</label>
+              <label className="block text-xs text-muted mb-1">Goalscorer {equipaFora}</label>
               <select
                 name="marcadorFora" value={mFora} onChange={e => setMFora(e.target.value)}
                 className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-gold"
               >
-                <option value="">Nenhum</option>
+                <option value="">None</option>
                 {jogadoresFora.map(j => (
                   <option key={j.id} value={j.name}>{j.number}. {j.name}</option>
                 ))}
@@ -112,14 +112,14 @@ export function FormPrevisao({
           <p className="text-red text-sm bg-red/10 border border-red/20 rounded-lg px-3 py-2">{resultado.error}</p>
         )}
         {resultado?.success && (
-          <p className="text-green text-sm bg-green/10 border border-green/20 rounded-lg px-3 py-2">✅ Previsão guardada!</p>
+          <p className="text-green text-sm bg-green/10 border border-green/20 rounded-lg px-3 py-2">✅ Prediction saved!</p>
         )}
 
         <button
           type="submit" disabled={isPending}
           className="w-full bg-gold text-dark font-bold py-3 rounded-xl hover:bg-gold/90 transition-colors disabled:opacity-50"
         >
-          {isPending ? 'A guardar…' : previsaoAtual ? 'Actualizar previsão' : 'Guardar previsão'}
+          {isPending ? 'Saving…' : previsaoAtual ? 'Update prediction' : 'Save prediction'}
         </button>
       </form>
     </>

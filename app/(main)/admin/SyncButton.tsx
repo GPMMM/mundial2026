@@ -10,7 +10,7 @@ export function SyncButton({ action }: { action: () => Promise<{ error?: string;
     setResult(null)
     startTransition(async () => {
       const res = await action()
-      setResult(res.error ? `❌ ${res.error}` : '✅ Sincronização concluída!')
+      setResult(res.error ? `❌ ${res.error}` : '✅ Sync complete!')
     })
   }
 
@@ -20,7 +20,7 @@ export function SyncButton({ action }: { action: () => Promise<{ error?: string;
         onClick={handleSync} disabled={isPending}
         className="bg-gold text-dark font-bold px-6 py-3 rounded-xl hover:bg-gold/90 transition-colors disabled:opacity-50"
       >
-        {isPending ? '⏳ A sincronizar…' : '🔄 Sincronizar agora'}
+        {isPending ? '⏳ Syncing…' : '🔄 Sync now'}
       </button>
       {result && <p className="text-sm">{result}</p>}
     </div>

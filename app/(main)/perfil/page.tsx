@@ -63,9 +63,9 @@ export default async function PerfilPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Pontos', value: pontos, color: 'text-gold' },
-          { label: 'Previsões', value: previsoesFaitas, color: 'text-white' },
-          { label: 'Precisão', value: `${percentagem}%`, color: 'text-green' },
+          { label: 'Points', value: pontos, color: 'text-gold' },
+          { label: 'Predictions', value: previsoesFaitas, color: 'text-white' },
+          { label: 'Accuracy', value: `${percentagem}%`, color: 'text-green' },
         ].map(s => (
           <div key={s.label} className="bg-surface rounded-xl border border-border p-4 text-center">
             <div className={`text-2xl font-black ${s.color}`}>{s.value}</div>
@@ -74,18 +74,18 @@ export default async function PerfilPage() {
         ))}
       </div>
 
-      {/* Campeão */}
+      {/* Champion */}
       <CampeaoForm
         campeaoAtual={user.campeao}
         campeaoIdAtual={user.campeaoId}
         equipas={uniqueEquipas}
       />
 
-      {/* Histórico */}
+      {/* History */}
       <section>
-        <h2 className="font-bold text-lg mb-3">Histórico de previsões</h2>
+        <h2 className="font-bold text-lg mb-3">Prediction history</h2>
         {previsoes.length === 0 ? (
-          <p className="text-muted text-sm text-center py-8">Ainda não fizeste nenhuma previsão.</p>
+          <p className="text-muted text-sm text-center py-8">You haven&apos;t made any predictions yet.</p>
         ) : (
           <div className="space-y-2">
             {previsoes.map(p => (
@@ -100,12 +100,12 @@ export default async function PerfilPage() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted">
                   <span>
-                    Previsão: <span className="text-white">{p.golosCasa} – {p.golosFora}</span>
+                    Prediction: <span className="text-white">{p.golosCasa} – {p.golosFora}</span>
                     {p.jogo.golosCasa != null && (
-                      <> · Real: <span className="text-white">{p.jogo.golosCasa} – {p.jogo.golosFora}</span></>
+                      <> · Result: <span className="text-white">{p.jogo.golosCasa} – {p.jogo.golosFora}</span></>
                     )}
                   </span>
-                  <span>{new Date(p.jogo.data).toLocaleDateString('pt-PT')}</span>
+                  <span>{new Date(p.jogo.data).toLocaleDateString('en-GB')}</span>
                 </div>
               </div>
             ))}
@@ -121,7 +121,7 @@ export default async function PerfilPage() {
           type="submit"
           className="w-full py-3 text-sm border border-border rounded-xl hover:bg-surface-2 transition-colors text-muted"
         >
-          Terminar sessão
+          Sign out
         </button>
       </form>
     </div>

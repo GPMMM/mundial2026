@@ -28,7 +28,7 @@ async function getLeaderboard(limit = 10) {
 
   return previsoes.map(p => ({
     userId: p.userId,
-    nome: userMap[p.userId]?.nome ?? 'Utilizador',
+    nome: userMap[p.userId]?.nome ?? 'User',
     imagem: userMap[p.userId]?.imagem ?? null,
     totalPontos: p._sum.pontos ?? 0,
     totalPrevisoes: p._count.id,
@@ -65,15 +65,15 @@ export default async function HomePage() {
   return (
     <div className="space-y-8">
       <div className="text-center py-4">
-        <h1 className="text-3xl font-black text-gold">🏆 Mundial 2026</h1>
-        <p className="text-muted mt-1">Prevê, compete, vence!</p>
+        <h1 className="text-3xl font-black text-gold">🏆 World Cup 2026</h1>
+        <p className="text-muted mt-1">Predict, compete, win!</p>
       </div>
 
       {jogosAoVivo.length > 0 && (
         <section>
           <h2 className="font-bold text-lg mb-3 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green pulse-live" />
-            Ao Vivo
+            LIVE
           </h2>
           <div className="space-y-3">
             {jogosAoVivo.map(j => (
@@ -85,8 +85,8 @@ export default async function HomePage() {
 
       <section>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-bold text-lg">Próximos jogos</h2>
-          <Link href="/jogos" className="text-sm text-gold hover:underline">Ver todos →</Link>
+          <h2 className="font-bold text-lg">Upcoming matches</h2>
+          <Link href="/jogos" className="text-sm text-gold hover:underline">View all →</Link>
         </div>
         {proximosJogos.length > 0 ? (
           <div className="space-y-3">
@@ -95,14 +95,14 @@ export default async function HomePage() {
             ))}
           </div>
         ) : (
-          <p className="text-muted text-sm text-center py-4">Sem jogos agendados.</p>
+          <p className="text-muted text-sm text-center py-4">No matches scheduled.</p>
         )}
       </section>
 
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-lg">Top 10</h2>
-          <Link href="/leaderboard" className="text-sm text-gold hover:underline">Ver tudo →</Link>
+          <Link href="/leaderboard" className="text-sm text-gold hover:underline">View all →</Link>
         </div>
         <TabelaLeaderboard entradas={leaderboard} destaqueUserId={session?.user?.id} />
       </section>

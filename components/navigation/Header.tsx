@@ -11,15 +11,15 @@ export function Header() {
     <header className="sticky top-0 z-40 bg-dark-2/90 backdrop-blur border-b border-border">
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-bold text-gold text-lg tracking-wide">
-          🏆 Mundial 2026
+          🏆 World Cup 2026
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm">
-          <Link href="/jogos" className="text-slate-300 hover:text-white transition-colors">Jogos</Link>
-          <Link href="/leaderboard" className="text-slate-300 hover:text-white transition-colors">Classificação</Link>
-          <Link href="/ligas" className="text-slate-300 hover:text-white transition-colors">Ligas</Link>
+          <Link href="/jogos" className="text-slate-300 hover:text-white transition-colors">Matches</Link>
+          <Link href="/leaderboard" className="text-slate-300 hover:text-white transition-colors">Standings</Link>
+          <Link href="/ligas" className="text-slate-300 hover:text-white transition-colors">Leagues</Link>
           {session ? (
             <>
-              <Link href="/perfil" className="text-slate-300 hover:text-white transition-colors">Perfil</Link>
+              <Link href="/perfil" className="text-slate-300 hover:text-white transition-colors">Profile</Link>
               {session.user.role === 'ADMIN' && (
                 <Link href="/admin" className="text-gold hover:text-gold/80 transition-colors">Admin</Link>
               )}
@@ -27,7 +27,7 @@ export function Header() {
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="text-muted hover:text-red transition-colors"
               >
-                Sair
+                Sign out
               </button>
             </>
           ) : (
@@ -35,7 +35,7 @@ export function Header() {
               href="/login"
               className="bg-gold text-dark font-semibold px-4 py-1.5 rounded-lg hover:bg-gold/90 transition-colors text-sm"
             >
-              Entrar
+              Sign in
             </Link>
           )}
         </nav>

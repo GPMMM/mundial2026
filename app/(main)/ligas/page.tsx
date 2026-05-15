@@ -19,7 +19,7 @@ export default async function LigasPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-black">🏆 As minhas ligas</h1>
+        <h1 className="text-2xl font-black">🏆 My Leagues</h1>
       </div>
 
       <LigasActions />
@@ -27,7 +27,7 @@ export default async function LigasPage() {
       {ligas.length === 0 && (
         <div className="text-center py-12 text-muted">
           <p className="text-3xl mb-2">🏆</p>
-          <p>Ainda não tens ligas. Cria uma ou entra com um código!</p>
+          <p>You don&apos;t have any leagues yet. Create one or join with a code!</p>
         </div>
       )}
 
