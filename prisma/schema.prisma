@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String       @id @default(cuid())
+  nome          String
+  email         String       @unique
+  emailVerified DateTime?
+  password      String?
+  imagem        String?
+  role          Role         @default(USER)
+  campeao       String?
+  campeaoId     Int?
+  previsoes     Previsao[]
+  ligasMembro   MembroLiga[]
+  ligasCriadas  Liga[]
+  accounts      Account[]
+  criadoEm      DateTime     @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Jogo {
+  id              String     @id @default(cuid())
+  fixtureId       Int        @unique
+  equipaCasa      String
+  equipaFora      String
+  equipaCasaId    Int?
+  equipaForaId    Int?
+  paisCasa        String
+  paisFora        String
+  data            DateTime
+  fase            Fase
+  grupo           String?
+  golosCasa       Int?
+  golosFora       Int?
+  encerrado       Boolean    @default(false)
+  marcadoresCasa  String[]   @default([])
+  marcadoresFora  String[]   @default([])
+  previsoes       Previsao[]
+}
+
+enum Fase {
+  GRUPOS
+  OITAVOS
+  QUARTOS
+  MEIAS
+  FINAL
+}
+
+model Previsao {
+  id            String   @id @default(cuid())
+  userId        String
+  jogoId        String
+  golosCasa     Int
+  golosFora     Int
+  marcadorCasa  String?
+  marcadorFora  String?
+  pontos        Int?
+  calculado     Boolean  @default(false)
+  criadoEm      DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  jogo          Jogo     @relation(fields: [jogoId], references: [id])
+
+  @@unique([userId, jogoId])
+}
+
+model Liga {
+  id             String       @id @default(cuid())
+  nome           String
+  descricao      String?
+  codigoConvite  String       @unique
+  criadorId      String
+  criador        User         @relation(fields: [criadorId], references: [id])
+  membros        MembroLiga[]
+  criadoEm       DateTime     @default(now())
+}
+
+model MembroLiga {
+  id       String   @id @default(cuid())
+  userId   String
+  ligaId   String
+  user     User     @relation(fields: [userId], references: [id])
+  liga     Liga     @relation(fields: [ligaId], references: [id])
+  criadoEm DateTime @default(now())
+
+  @@unique([userId, ligaId])
+}
