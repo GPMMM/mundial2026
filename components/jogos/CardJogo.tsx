@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Jogo, Previsao } from '@prisma/client'
+import { urlBandeira } from '@/lib/flags'
 
 interface Props {
   jogo: Jogo
@@ -8,17 +9,11 @@ interface Props {
   isLive?: boolean
 }
 
-function TeamLogo({ id, name }: { id: number | null; name: string }) {
-  if (!id) return <span className="text-3xl">🏳️</span>
+function TeamLogo({ name }: { id: number | null; name: string }) {
+  const src = urlBandeira(name, 40)
+  if (!src) return <span className="text-2xl">🏳️</span>
   return (
-    <Image
-      src={`https://media.api-sports.io/football/teams/${id}.png`}
-      alt={name}
-      width={40}
-      height={40}
-      className="object-contain drop-shadow"
-      unoptimized
-    />
+    <Image src={src} alt={name} width={40} height={27} className="rounded-sm object-cover shadow-sm" unoptimized />
   )
 }
 

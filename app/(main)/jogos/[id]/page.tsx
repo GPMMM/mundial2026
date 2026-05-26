@@ -1,28 +1,25 @@
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
-import { getFixtureLineups } from '@/lib/api-football'
+import { getSquad } from '@/lib/api-football'
 import { FormPrevisao } from '@/components/jogos/FormPrevisao'
 import Image from 'next/image'
-import type { ApiLineup } from '@/lib/api-football'
+import { urlBandeira } from '@/lib/flags'
+import type { ApiSquad } from '@/lib/api-football'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
 const FASE_LABEL: Record<string, string> = {
-  GRUPOS: 'Group Stage', OITAVOS: 'Round of 16', QUARTOS: 'Quarter-finals', MEIAS: 'Semi-finals', FINAL: 'Final',
+  GRUPOS: 'Group Stage', TRINTA_E_DOIS: 'Round of 32', OITAVOS: 'Round of 16', QUARTOS: 'Quarter-finals', MEIAS: 'Semi-finals', FINAL: 'Final',
 }
 
-function TeamLogo({ id, name, size = 64 }: { id: number | null; name: string; size?: number }) {
-  if (!id) return <div className="text-5xl">🏳️</div>
+function TeamLogo({ name }: { id: number | null; name: string; size?: number }) {
+  const src = urlBandeira(name, 80)
+  if (!src) return <span className="text-5xl">🏳️</span>
   return (
-    <Image
-      src={`https://media.api-sports.io/football/teams/${id}.png`}
-      alt={name} width={size} height={size}
-      className="object-contain drop-shadow-lg"
-      unoptimized
-    />
+    <Image src={src} alt={name} width={80} height={54} className="rounded object-cover shadow-md" unoptimized />
   )
 }
 
@@ -42,25 +39,36 @@ export default async function JogoDetailPage({ params }: Props) {
     ? jogo.previsoes.find(p => p.userId === session.user.id) ?? null
     : null
 
-  // Load lineups if game hasn't started yet (to allow scorer selection)
+  // Load squad lists for scorer prediction (uses convocatória, not match lineup)
   let jogadoresCasa: { id: number; name: string; pos: string; number: number }[] = []
   let jogadoresFora: { id: number; name: string; pos: string; number: number }[] = []
   if (!jogoComecou) {
     try {
-      const lineupData = await getFixtureLineups(jogo.fixtureId)
-      const lineups: ApiLineup[] = lineupData.response ?? []
-      const [casaLineup, foraLineup] = lineups
-      if (casaLineup) {
-        jogadoresCasa = [...casaLineup.startXI, ...casaLineup.substitutes].map(p => ({
-          id: p.player.id, name: p.player.name, pos: p.player.pos, number: p.player.number,
-        }))
+      const [casaData, foraData] = await Promise.allSettled([
+        jogo.equipaCasaId ? getSquad(jogo.equipaCasaId) : Promise.resolve(null),
+        jogo.equipaForaId ? getSquad(jogo.equipaForaId) : Promise.resolve(null),
+      ])
+      if (casaData.status === 'fulfilled' && casaData.value) {
+        const squads: ApiSquad[] = casaData.value.response ?? []
+        const squad = squads[0]
+        if (squad) {
+          jogadoresCasa = squad.players.map(p => ({
+            id: p.id, name: p.name, pos: p.position, number: p.number ?? 0,
+          }))
+        }
       }
-      if (foraLineup) {
-        jogadoresFora = [...foraLineup.startXI, ...foraLineup.substitutes].map(p => ({
-          id: p.player.id, name: p.player.name, pos: p.player.pos, number: p.player.number,
-        }))
+      if (foraData.status === 'fulfilled' && foraData.value) {
+        const squads: ApiSquad[] = foraData.value.response ?? []
+        const squad = squads[0]
+        if (squad) {
+          jogadoresFora = squad.players.map(p => ({
+            id: p.id, name: p.name, pos: p.position, number: p.number ?? 0,
+          }))
+        }
       }
-    } catch { /* lineups not available yet */ }
+    } catch {
+      // Squad fetch failed — predictions still work, just no goalscorer dropdown
+    }
   }
 
   const outrasPrevisoes = jogoComecou

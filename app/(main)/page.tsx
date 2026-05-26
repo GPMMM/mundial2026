@@ -2,7 +2,43 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { CardJogo } from '@/components/jogos/CardJogo'
 import { TabelaLeaderboard } from '@/components/leaderboard/TabelaLeaderboard'
+import { SquadStatusList } from '@/components/admin/SquadStatusList'
 import Link from 'next/link'
+
+async function getSquadStatus() {
+  // Get all teams from upcoming fixtures
+  const jogos = await prisma.jogo.findMany({
+    where: { encerrado: false, fase: 'GRUPOS' },
+    select: { equipaCasa: true, equipaCasaId: true, equipaFora: true, equipaForaId: true },
+  })
+
+  // Collect all (name, id) pairs
+  const teamMap = new Map<string, number | null>()
+  for (const j of jogos) {
+    teamMap.set(j.equipaCasa, j.equipaCasaId)
+    teamMap.set(j.equipaFora, j.equipaForaId)
+  }
+
+  // Find teams with null IDs
+  const semId = [...teamMap.entries()]
+    .filter(([, id]) => id === null)
+    .map(([name]) => name)
+    .sort()
+
+  // Find teams sharing the same API ID (duplicates)
+  const idToTeams = new Map<number, string[]>()
+  for (const [name, id] of teamMap.entries()) {
+    if (id === null) continue
+    const existing = idToTeams.get(id) ?? []
+    idToTeams.set(id, [...existing, name])
+  }
+  const duplicados = [...idToTeams.entries()]
+    .filter(([, teams]) => teams.length > 1)
+    .map(([id, teams]) => ({ id, teams: teams.sort() }))
+    .sort((a, b) => a.id - b.id)
+
+  return { semId, duplicados }
+}
 
 async function getLeaderboard(limit = 10) {
   const previsoes = await prisma.previsao.groupBy({
@@ -40,7 +76,7 @@ export default async function HomePage() {
   const session = await auth()
 
   const agora = new Date()
-  const [proximosJogos, jogosAoVivo, leaderboard] = await Promise.all([
+  const [proximosJogos, jogosAoVivo, leaderboard, squadStatus] = await Promise.all([
     prisma.jogo.findMany({
       where: { data: { gte: agora }, encerrado: false },
       orderBy: { data: 'asc' },
@@ -51,6 +87,7 @@ export default async function HomePage() {
       orderBy: { data: 'asc' },
     }),
     getLeaderboard(10),
+    getSquadStatus(),
   ])
 
   let previsaoMap: Record<string, NonNullable<Awaited<ReturnType<typeof prisma.previsao.findFirst>>>> = {}
@@ -106,6 +143,10 @@ export default async function HomePage() {
         </div>
         <TabelaLeaderboard entradas={leaderboard} destaqueUserId={session?.user?.id} />
       </section>
+
+      {session?.user?.role === 'ADMIN' && (squadStatus.semId.length > 0 || squadStatus.duplicados.length > 0) && (
+        <SquadStatusList semId={squadStatus.semId} duplicados={squadStatus.duplicados} />
+      )}
     </div>
   )
 }

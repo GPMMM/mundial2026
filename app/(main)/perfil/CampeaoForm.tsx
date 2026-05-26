@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { guardarCampeao } from '@/lib/actions/previsoes'
 import Image from 'next/image'
+import { urlBandeira } from '@/lib/flags'
 
 interface Equipa {
   nome: string
@@ -38,15 +39,18 @@ export function CampeaoForm({ campeaoAtual, campeaoIdAtual, equipas }: Props) {
       <p className="text-muted text-xs mb-3">Get it right and earn +20 bonus points!</p>
 
       <form onSubmit={handleSubmit} className="bg-surface rounded-xl border border-border p-4 space-y-3">
-        {selected && selected.id && (
-          <div className="flex items-center gap-3 p-3 bg-surface-2 rounded-lg border border-gold/30">
-            <Image
-              src={`https://media.api-sports.io/football/teams/${selected.id}.png`}
-              alt={selected.nome} width={40} height={40} className="object-contain" unoptimized
-            />
-            <span className="font-semibold">{selected.nome}</span>
-          </div>
-        )}
+        {selected && (() => {
+          const src = urlBandeira(selected.nome, 40)
+          return (
+            <div className="flex items-center gap-3 p-3 bg-surface-2 rounded-lg border border-gold/30">
+              {src
+                ? <Image src={src} alt={selected.nome} width={40} height={27} className="rounded-sm object-cover" unoptimized />
+                : <span className="text-2xl">🏳️</span>
+              }
+              <span className="font-semibold">{selected.nome}</span>
+            </div>
+          )
+        })()}
 
         <select
           name="campeao"

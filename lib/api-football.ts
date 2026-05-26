@@ -8,6 +8,10 @@ async function apiFetch(path: string) {
     next: { revalidate: 0 },
   })
   if (!res.ok) throw new Error(`API-Football error: ${res.status}`)
+  const contentType = res.headers.get('content-type') ?? ''
+  if (!contentType.includes('application/json')) {
+    throw new Error(`API-Football returned non-JSON response (${res.status})`)
+  }
   return res.json()
 }
 
@@ -25,6 +29,10 @@ export async function getFixtureEvents(fixtureId: number) {
 
 export async function getFixtureLineups(fixtureId: number) {
   return apiFetch(`/fixtures/lineups?fixture=${fixtureId}`)
+}
+
+export async function getSquad(teamId: number) {
+  return apiFetch(`/players/squads?team=${teamId}`)
 }
 
 export function parseFase(round: string): 'GRUPOS' | 'OITAVOS' | 'QUARTOS' | 'MEIAS' | 'FINAL' {
@@ -88,4 +96,18 @@ export interface ApiLineup {
   team: { id: number; name: string }
   startXI: ApiLineupPlayer[]
   substitutes: ApiLineupPlayer[]
+}
+
+export interface ApiSquadPlayer {
+  id: number
+  name: string
+  age: number
+  number: number | null
+  position: string
+  photo: string
+}
+
+export interface ApiSquad {
+  team: { id: number; name: string; logo: string }
+  players: ApiSquadPlayer[]
 }

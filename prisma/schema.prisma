@@ -76,6 +76,7 @@ model Jogo {
 
 enum Fase {
   GRUPOS
+  TRINTA_E_DOIS
   OITAVOS
   QUARTOS
   MEIAS

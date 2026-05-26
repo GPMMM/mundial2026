@@ -2,8 +2,9 @@ import { Fase } from '@prisma/client'
 
 const MULTIPLICADORES: Record<Fase, number> = {
   GRUPOS: 1,
-  OITAVOS: 1.5,
-  QUARTOS: 2,
+  TRINTA_E_DOIS: 1.5,
+  OITAVOS: 2,
+  QUARTOS: 2.5,
   MEIAS: 3,
   FINAL: 4,
 }

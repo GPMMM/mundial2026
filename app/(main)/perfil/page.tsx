@@ -30,15 +30,14 @@ export default async function PerfilPage() {
   const acertos = previsoes.filter(p => p.calculado && (p.pontos ?? 0) > 0).length
   const percentagem = previsoesFaitas > 0 ? Math.round((acertos / previsoesFaitas) * 100) : 0
 
-  // All WC teams for the champion form (fetched from our stored games)
-  const equipas = await prisma.jogo.findMany({
+  // All WC teams for the champion form — group stage only to exclude knockout placeholders (V99, 1º A…)
+  const jogosGrupos = await prisma.jogo.findMany({
+    where: { fase: 'GRUPOS' },
     select: { equipaCasa: true, equipaCasaId: true, equipaFora: true, equipaForaId: true },
-    distinct: ['equipaCasa'],
-    orderBy: { equipaCasa: 'asc' },
   })
   const allEquipas = [
-    ...equipas.map(e => ({ nome: e.equipaCasa, id: e.equipaCasaId })),
-    ...equipas.map(e => ({ nome: e.equipaFora, id: e.equipaForaId })),
+    ...jogosGrupos.map(e => ({ nome: e.equipaCasa, id: e.equipaCasaId })),
+    ...jogosGrupos.map(e => ({ nome: e.equipaFora, id: e.equipaForaId })),
   ]
   const uniqueEquipas = Array.from(new Map(allEquipas.map(e => [e.nome, e])).values())
     .sort((a, b) => a.nome.localeCompare(b.nome))
