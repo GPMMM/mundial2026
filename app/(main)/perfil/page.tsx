@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { CardJogo } from '@/components/jogos/CardJogo'
 import { CampeaoForm } from './CampeaoForm'
 import Image from 'next/image'
 import { signOut } from '@/lib/auth'
@@ -28,7 +27,8 @@ export default async function PerfilPage() {
   const pontos = totalPontos._sum.pontos ?? 0
   const previsoesFaitas = previsoes.length
   const acertos = previsoes.filter(p => p.calculado && (p.pontos ?? 0) > 0).length
-  const percentagem = previsoesFaitas > 0 ? Math.round((acertos / previsoesFaitas) * 100) : 0
+  const calculadas = previsoes.filter(p => p.calculado).length
+  const percentagem = calculadas > 0 ? Math.round((acertos / calculadas) * 100) : 0
 
   // All WC teams for the champion form — group stage only to exclude knockout placeholders (V99, 1º A…)
   const jogosGrupos = await prisma.jogo.findMany({

@@ -35,9 +35,10 @@ export async function getSquad(teamId: number) {
   return apiFetch(`/players/squads?team=${teamId}`)
 }
 
-export function parseFase(round: string): 'GRUPOS' | 'OITAVOS' | 'QUARTOS' | 'MEIAS' | 'FINAL' {
+export function parseFase(round: string): 'GRUPOS' | 'TRINTA_E_DOIS' | 'OITAVOS' | 'QUARTOS' | 'MEIAS' | 'FINAL' {
   const r = round.toLowerCase()
   if (r.includes('group')) return 'GRUPOS'
+  if (r.includes('round of 32') || r.includes('1/16')) return 'TRINTA_E_DOIS'
   if (r.includes('round of 16') || r.includes('1/8') || r.includes('round of sixteen')) return 'OITAVOS'
   if (r.includes('quarter')) return 'QUARTOS'
   if (r.includes('semi')) return 'MEIAS'
@@ -50,18 +51,6 @@ export function parseGrupo(round: string): string | null {
   return match ? match[1].toUpperCase() : null
 }
 
-export function extractGoalScorers(events: ApiEvent[]): { home: string[]; away: string[] } {
-  const home: string[] = []
-  const away: string[] = []
-  for (const event of events) {
-    if (event.type === 'Goal' && event.detail !== 'Missed Penalty') {
-      const name = event.player?.name ?? ''
-      if (event.team?.id === event.teams?.home?.id) home.push(name)
-      else away.push(name)
-    }
-  }
-  return { home, away }
-}
 
 export interface ApiFixture {
   fixture: {

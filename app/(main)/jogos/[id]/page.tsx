@@ -140,7 +140,7 @@ export default async function JogoDetailPage({ params }: Props) {
       ) : (
         <div className="bg-surface rounded-xl border border-border p-4 text-center">
           <p className="text-muted text-sm">
-            <a href="/login" className="text-gold hover:underline">Sign in</a> to make your prediction
+            <a href="/login" className="text-gold hover:underline">Sign in</a> to make your prediction.
           </p>
         </div>
       )}
@@ -148,7 +148,7 @@ export default async function JogoDetailPage({ params }: Props) {
       {/* Other predictions (after match starts) */}
       {jogoComecou && outrasPrevisoes.length > 0 && (
         <section>
-          <h3 className="font-bold mb-3">Participants' predictions</h3>
+          <h3 className="font-bold mb-3">Participants&apos; predictions</h3>
           <div className="space-y-2">
             {outrasPrevisoes.map(p => (
               <div key={p.id} className="bg-surface rounded-xl border border-border px-4 py-3 flex items-center justify-between">

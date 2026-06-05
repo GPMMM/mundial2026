@@ -53,10 +53,10 @@ export default async function AdminPage() {
           <table className="w-full">
             <thead>
               <tr className="bg-surface-2 text-xs text-muted uppercase">
-                <th className="px-4 py-3 text-left">Nome</th>
+                <th className="px-4 py-3 text-left">Name</th>
                 <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Role</th>
-                <th className="px-4 py-3 text-left">Desde</th>
+                <th className="px-4 py-3 text-left">Since</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>

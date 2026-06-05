@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { CardJogo } from '@/components/jogos/CardJogo'
+import Link from 'next/link'
 import type { Fase } from '@prisma/client'
 
 const FASE_LABEL: Record<Fase, string> = {
@@ -68,19 +69,19 @@ export default async function JogosPage({ searchParams }: Props) {
       <h1 className="text-2xl font-black">⚽ Matches</h1>
 
       {semCampeao && (
-        <a href="/perfil" className="flex items-center gap-3 bg-gold/10 border border-gold/40 rounded-xl px-4 py-3 hover:bg-gold/20 transition-colors">
+        <Link href="/perfil" className="flex items-center gap-3 bg-gold/10 border border-gold/40 rounded-xl px-4 py-3 hover:bg-gold/20 transition-colors">
           <span className="text-2xl">🏆</span>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-gold text-sm">Champion prediction missing!</p>
             <p className="text-xs text-muted mt-0.5">Pick your World Cup winner and earn +20 bonus points.</p>
           </div>
           <span className="text-gold text-sm font-bold shrink-0">Pick now →</span>
-        </a>
+        </Link>
       )}
 
       {/* Phase filter tabs */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
-        <a
+        <Link
           href="/jogos"
           className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             !faseFiltro
@@ -89,9 +90,9 @@ export default async function JogosPage({ searchParams }: Props) {
           }`}
         >
           All
-        </a>
+        </Link>
         {fasesComJogos.map(f => (
-          <a
+          <Link
             key={f}
             href={`/jogos?fase=${f}`}
             className={`shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -101,7 +102,7 @@ export default async function JogosPage({ searchParams }: Props) {
             }`}
           >
             {FASE_SHORT[f]}
-          </a>
+          </Link>
         ))}
       </div>
 

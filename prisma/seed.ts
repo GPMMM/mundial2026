@@ -94,9 +94,10 @@ async function main() {
   console.log(`✅ Fixtures: ${created} created, ${updated} updated`)
 }
 
-function parseFase(round: string): 'GRUPOS' | 'OITAVOS' | 'QUARTOS' | 'MEIAS' | 'FINAL' {
+function parseFase(round: string): 'GRUPOS' | 'TRINTA_E_DOIS' | 'OITAVOS' | 'QUARTOS' | 'MEIAS' | 'FINAL' {
   const r = round.toLowerCase()
   if (r.includes('group')) return 'GRUPOS'
+  if (r.includes('round of 32') || r.includes('1/16')) return 'TRINTA_E_DOIS'
   if (r.includes('round of 16') || r.includes('1/8') || r.includes('round of sixteen')) return 'OITAVOS'
   if (r.includes('quarter')) return 'QUARTOS'
   if (r.includes('semi')) return 'MEIAS'

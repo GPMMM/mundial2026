@@ -93,6 +93,7 @@ model Previsao {
   marcadorFora  String?
   pontos        Int?
   calculado     Boolean  @default(false)
+  bonusGrupo    Boolean  @default(false)
   criadoEm      DateTime @default(now())
   user          User     @relation(fields: [userId], references: [id])
   jogo          Jogo     @relation(fields: [jogoId], references: [id])

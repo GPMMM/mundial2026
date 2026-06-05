@@ -105,7 +105,7 @@ export default async function LigaDetailPage({ params }: Props) {
       {/* Membros (admin view) */}
       {isCriador && (
         <section>
-          <h2 className="font-bold text-lg mb-3">Membros ({liga.membros.length})</h2>
+          <h2 className="font-bold text-lg mb-3">Members ({liga.membros.length})</h2>
           <div className="space-y-2">
             {liga.membros.map(m => (
               <div key={m.id} className="bg-surface rounded-xl border border-border px-4 py-3 flex items-center justify-between">

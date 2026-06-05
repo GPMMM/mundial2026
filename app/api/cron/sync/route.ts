@@ -60,8 +60,8 @@ export async function GET(request: Request) {
       if (jogo.previsoes.length === 0) continue
 
       // Fetch scorers if not stored yet
-      let marcadoresCasa = jogo.marcadoresCasa
-      let marcadoresFora = jogo.marcadoresFora
+      const marcadoresCasa = [...jogo.marcadoresCasa]
+      const marcadoresFora = [...jogo.marcadoresFora]
       if (marcadoresCasa.length === 0 && marcadoresFora.length === 0) {
         try {
           const eventsData = await getFixtureEvents(jogo.fixtureId)
@@ -127,6 +127,13 @@ async function calcularBonusGrupo() {
 
     const userIds = [...new Set(jogosGrupo.flatMap(j => j.previsoes.map(p => p.userId)))]
     for (const userId of userIds) {
+      // Skip if bonus already applied to all of this user's predictions in the group
+      const jaAplicado = jogosGrupo.every(j => {
+        const prev = j.previsoes.find(p => p.userId === userId)
+        return prev?.bonusGrupo === true
+      })
+      if (jaAplicado) continue
+
       let todosAcertados = true
       for (const jogo of jogosGrupo) {
         const prev = jogo.previsoes.find(p => p.userId === userId)
@@ -139,10 +146,10 @@ async function calcularBonusGrupo() {
       if (todosAcertados) {
         for (const jogo of jogosGrupo) {
           const prev = jogo.previsoes.find(p => p.userId === userId)
-          if (prev && prev.pontos != null) {
+          if (prev && prev.pontos != null && !prev.bonusGrupo) {
             await prisma.previsao.update({
               where: { id: prev.id },
-              data: { pontos: prev.pontos + Math.round(5 / 3) },
+              data: { pontos: prev.pontos + Math.round(5 / 3), bonusGrupo: true },
             })
           }
         }
