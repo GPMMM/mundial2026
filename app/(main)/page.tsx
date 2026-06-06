@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth'
 import { CardJogo } from '@/components/jogos/CardJogo'
 import { TabelaLeaderboard } from '@/components/leaderboard/TabelaLeaderboard'
 import { SquadStatusList } from '@/components/admin/SquadStatusList'
+import { PontosGuide } from '@/components/PontosGuide'
 import Link from 'next/link'
 
 async function getSquadStatus() {
@@ -76,6 +77,14 @@ export default async function HomePage() {
   const session = await auth()
 
   const agora = new Date()
+  let campeaoUser: { campeao: string | null; campeaoId: number | null } | null = null
+  if (session?.user?.id) {
+    campeaoUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { campeao: true, campeaoId: true },
+    })
+  }
+
   const [proximosJogos, jogosAoVivo, leaderboard, squadStatus] = await Promise.all([
     prisma.jogo.findMany({
       where: { data: { gte: agora }, encerrado: false },
@@ -105,6 +114,23 @@ export default async function HomePage() {
         <h1 className="text-3xl font-black text-gold">🏆 World Cup 2026</h1>
         <p className="text-muted mt-1">Predict, compete, win!</p>
       </div>
+
+      {/* Champion pick card */}
+      <Link href="/perfil" className="block bg-surface border border-gold/40 rounded-xl p-4 hover:border-gold/70 transition-colors">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs text-muted uppercase tracking-wide font-semibold mb-0.5">Champion Prediction</p>
+            {campeaoUser?.campeao
+              ? <p className="font-bold text-white">{campeaoUser.campeao}</p>
+              : <p className="font-bold text-gold">{session?.user ? 'Pick your champion!' : 'Sign in to predict'}</p>
+            }
+            <p className="text-xs text-muted mt-0.5">Worth +20 bonus points if correct</p>
+          </div>
+          <span className="text-3xl">{campeaoUser?.campeao ? '🏆' : '❓'}</span>
+        </div>
+      </Link>
+
+      <PontosGuide />
 
       {jogosAoVivo.length > 0 && (
         <section>
