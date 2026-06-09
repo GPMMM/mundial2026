@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { getSquad } from '@/lib/api-football'
 import { FormPrevisao } from '@/components/jogos/FormPrevisao'
+import { BackButton } from '@/components/ui/BackButton'
 import Image from 'next/image'
 import { urlBandeira } from '@/lib/flags'
 import type { ApiSquad } from '@/lib/api-football'
@@ -52,18 +53,18 @@ export default async function JogoDetailPage({ params }: Props) {
         const squads: ApiSquad[] = casaData.value.response ?? []
         const squad = squads[0]
         if (squad) {
-          jogadoresCasa = squad.players.map(p => ({
-            id: p.id, name: p.name, pos: p.position, number: p.number ?? 0,
-          }))
+          jogadoresCasa = squad.players
+            .map(p => ({ id: p.id, name: p.name, pos: p.position, number: p.number ?? 0 }))
+            .sort((a, b) => a.number - b.number)
         }
       }
       if (foraData.status === 'fulfilled' && foraData.value) {
         const squads: ApiSquad[] = foraData.value.response ?? []
         const squad = squads[0]
         if (squad) {
-          jogadoresFora = squad.players.map(p => ({
-            id: p.id, name: p.name, pos: p.position, number: p.number ?? 0,
-          }))
+          jogadoresFora = squad.players
+            .map(p => ({ id: p.id, name: p.name, pos: p.position, number: p.number ?? 0 }))
+            .sort((a, b) => a.number - b.number)
         }
       }
     } catch {
@@ -77,6 +78,7 @@ export default async function JogoDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
+      <BackButton fallback="/jogos" label="← Matches" />
       {/* Header do jogo */}
       <div className="bg-surface rounded-2xl border border-border p-6">
         <div className="flex items-center justify-between text-xs text-muted mb-4">

@@ -33,16 +33,27 @@ export default async function LigaDetailPage({ params }: Props) {
 
   // Leaderboard da liga
   const userIds = liga.membros.map(m => m.userId)
-  const previsoes = await prisma.previsao.groupBy({
-    by: ['userId'],
-    _sum: { pontos: true },
-    _count: { id: true },
-    where: { userId: { in: userIds }, calculado: true },
-    orderBy: { _sum: { pontos: 'desc' } },
-  })
+
+  const [pontosPorUser, totalPrevisoesPorUser] = await Promise.all([
+    prisma.previsao.groupBy({
+      by: ['userId'],
+      _sum: { pontos: true },
+      where: { userId: { in: userIds }, calculado: true },
+      orderBy: { _sum: { pontos: 'desc' } },
+    }),
+    prisma.previsao.groupBy({
+      by: ['userId'],
+      _count: { id: true },
+      where: { userId: { in: userIds } },
+    }),
+  ])
+
+  const totalPrevisaoMap = Object.fromEntries(
+    totalPrevisoesPorUser.map(p => [p.userId, p._count.id])
+  )
 
   const acertosMap: Record<string, number> = {}
-  for (const p of previsoes) {
+  for (const p of pontosPorUser) {
     acertosMap[p.userId] = await prisma.previsao.count({
       where: { userId: p.userId, calculado: true, pontos: { gt: 0 } },
     })
@@ -50,28 +61,18 @@ export default async function LigaDetailPage({ params }: Props) {
 
   const userMap = Object.fromEntries(liga.membros.map(m => [m.userId, m.user]))
 
-  // Add members with 0 points who haven't made predictions
-  const comPrevisoes = new Set(previsoes.map(p => p.userId))
-  const semPrevisoes = userIds.filter(uid => !comPrevisoes.has(uid))
+  const pontosMap = Object.fromEntries(pontosPorUser.map(p => [p.userId, p._sum.pontos ?? 0]))
 
-  const leaderboard = [
-    ...previsoes.map(p => ({
-      userId: p.userId,
-      nome: userMap[p.userId]?.nome ?? 'User',
-      imagem: userMap[p.userId]?.imagem ?? null,
-      totalPontos: p._sum.pontos ?? 0,
-      totalPrevisoes: p._count.id,
-      acertos: acertosMap[p.userId] ?? 0,
-    })),
-    ...semPrevisoes.map(uid => ({
+  const leaderboard = userIds
+    .map(uid => ({
       userId: uid,
       nome: userMap[uid]?.nome ?? 'User',
       imagem: userMap[uid]?.imagem ?? null,
-      totalPontos: 0,
-      totalPrevisoes: 0,
-      acertos: 0,
-    })),
-  ]
+      totalPontos: pontosMap[uid] ?? 0,
+      totalPrevisoes: totalPrevisaoMap[uid] ?? 0,
+      acertos: acertosMap[uid] ?? 0,
+    }))
+    .sort((a, b) => b.totalPontos - a.totalPontos)
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">

@@ -32,7 +32,12 @@ export async function getFixtureLineups(fixtureId: number) {
 }
 
 export async function getSquad(teamId: number) {
-  return apiFetch(`/players/squads?team=${teamId}`)
+  const res = await fetch(`${BASE_URL}/players/squads?team=${teamId}`, {
+    headers: { 'x-apisports-key': process.env.API_FOOTBALL_KEY! },
+    next: { revalidate: 259200 }, // cache 3 days — squads don't change during tournament
+  })
+  if (!res.ok) throw new Error(`API-Football error: ${res.status}`)
+  return res.json()
 }
 
 export function parseFase(round: string): 'GRUPOS' | 'TRINTA_E_DOIS' | 'OITAVOS' | 'QUARTOS' | 'MEIAS' | 'FINAL' {
