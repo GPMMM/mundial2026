@@ -1,21 +1,32 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { forceSyncAction, alterarRole } from '@/lib/actions/admin'
+import { forceSyncAction, alterarRole, calcularPontosAction } from '@/lib/actions/admin'
 import { SyncButton } from './SyncButton'
+import { ResultadoForm } from './ResultadoForm'
+import { CalcPontosBtn } from './CalcPontosBtn'
 import Image from 'next/image'
 
 export default async function AdminPage() {
   const session = await auth()
   if (!session?.user?.id || session.user.role !== 'ADMIN') redirect('/')
 
-  const [users, totalJogos, totalPrevisoes] = await Promise.all([
+  const [users, totalJogos, totalPrevisoes, jogos] = await Promise.all([
     prisma.user.findMany({ orderBy: { criadoEm: 'desc' } }),
     prisma.jogo.count(),
     prisma.previsao.count(),
+    prisma.jogo.findMany({ orderBy: { data: 'asc' } }),
   ])
 
-  const jogosSincronizados = await prisma.jogo.count({ where: { encerrado: true } })
+  const jogosSincronizados = jogos.filter(j => j.encerrado).length
+  const naoCalculadas = await prisma.previsao.count({ where: { calculado: false } })
+
+  const jogosPorGrupo = jogos.reduce<Record<string, typeof jogos>>((acc, j) => {
+    const key = j.grupo ? `Group ${j.grupo}` : j.fase
+    acc[key] = acc[key] ?? []
+    acc[key].push(j)
+    return acc
+  }, {})
 
   return (
     <div className="space-y-8">
@@ -39,10 +50,42 @@ export default async function AdminPage() {
         ))}
       </div>
 
+      {/* Calculate points */}
+      <section className="bg-surface rounded-xl border border-border p-5">
+        <h2 className="font-bold mb-1">Calculate points</h2>
+        <p className="text-muted text-xs mb-4">
+          Process all finished matches and calculate points for uncalculated predictions.
+          {naoCalculadas > 0 && <span className="ml-1 text-gold font-bold">{naoCalculadas} pending</span>}
+        </p>
+        <CalcPontosBtn action={calcularPontosAction} />
+      </section>
+
+      {/* Match results */}
+      <section className="bg-surface rounded-xl border border-border p-5">
+        <h2 className="font-bold mb-4">Match results</h2>
+        <div className="space-y-6">
+          {Object.entries(jogosPorGrupo).map(([grupo, matches]) => (
+            <div key={grupo}>
+              <h3 className="text-xs font-bold text-muted uppercase tracking-wider mb-3">{grupo}</h3>
+              <div className="space-y-2">
+                {matches.map(j => (
+                  <div key={j.id} className="border-b border-border pb-2">
+                    <div className="text-xs text-muted mb-1">
+                      {new Date(j.data).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                    <ResultadoForm jogo={j} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Sync */}
       <section className="bg-surface rounded-xl border border-border p-5">
-        <h2 className="font-bold mb-1">Manual sync</h2>
-        <p className="text-muted text-xs mb-4">Force match sync and points calculation via API-Football.</p>
+        <h2 className="font-bold mb-1">API sync</h2>
+        <p className="text-muted text-xs mb-4">Force match sync via API-Football (requires paid plan for 2026 season).</p>
         <SyncButton action={forceSyncAction} />
       </section>
 

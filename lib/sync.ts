@@ -1,99 +1,121 @@
 import { prisma } from './prisma'
-import { getFixtures, getFixtureEvents, getFixtureLineups, parseFase, parseGrupo } from './api-football'
 import { calcularPontuacaoJogo, acertouResultado } from './pontuacao'
-import type { ApiFixture } from './api-football'
-import type { Fase } from '@prisma/client'
+import {
+  getEspnFixturesByDate,
+  getEspnScorers,
+  toPT,
+  dateRange,
+} from './espn'
 
-export async function runSync(): Promise<{ fixtures: number }> {
-  const data = await getFixtures()
-  const fixtures: ApiFixture[] = data.response ?? []
+// WC2026 starts June 11 2026
+const TORNEIO_INICIO = new Date('2026-06-11T00:00:00Z')
 
-  for (const f of fixtures) {
-    const fase = parseFase(f.league.round) as Fase
-    const grupo = f.league.group
-      ? f.league.group.replace(/^Group\s*/i, '').toUpperCase()
-      : parseGrupo(f.league.round)
+export async function runSync(fullSync = false): Promise<{ fixtures: number }> {
+  const hoje = new Date()
+  const startDate = fullSync ? TORNEIO_INICIO : (() => {
+    // Fetch yesterday + today to catch late finishes
+    const d = new Date(hoje)
+    d.setUTCDate(d.getUTCDate() - 1)
+    return d
+  })()
 
-    await prisma.jogo.upsert({
-      where: { fixtureId: f.fixture.id },
-      update: {
-        data: new Date(f.fixture.date),
-        fase,
-        grupo,
-        golosCasa: f.goals.home,
-        golosFora: f.goals.away,
-        encerrado: f.fixture.status.short === 'FT' || f.fixture.status.short === 'AET' || f.fixture.status.short === 'PEN',
-      },
-      create: {
-        fixtureId: f.fixture.id,
-        equipaCasa: f.teams.home.name,
-        equipaFora: f.teams.away.name,
-        equipaCasaId: f.teams.home.id,
-        equipaForaId: f.teams.away.id,
-        paisCasa: f.teams.home.name,
-        paisFora: f.teams.away.name,
-        data: new Date(f.fixture.date),
-        fase,
-        grupo,
-        golosCasa: f.goals.home,
-        golosFora: f.goals.away,
-        encerrado: f.fixture.status.short === 'FT',
-      },
-    })
+  const dates = dateRange(startDate, hoje)
+  let fichasProcessadas = 0
+
+  for (const dateStr of dates) {
+    const events = await getEspnFixturesByDate(dateStr)
+    for (const event of events) {
+      const comp = event.competitions[0]
+      if (!comp) continue
+
+      const isFinished = comp.status.type.completed
+      const home = comp.competitors.find(c => c.homeAway === 'home')
+      const away = comp.competitors.find(c => c.homeAway === 'away')
+      if (!home || !away) continue
+
+      const equipaCasa = toPT(home.team.displayName)
+      const equipaFora = toPT(away.team.displayName)
+      const golosCasa = parseInt(home.score) || 0
+      const golosFora = parseInt(away.score) || 0
+
+      // Find matching fixture in DB by team names (seed uses PT names)
+      const jogo = await prisma.jogo.findFirst({
+        where: { equipaCasa, equipaFora },
+      })
+      if (!jogo) continue
+
+      fichasProcessadas++
+
+      if (!isFinished && jogo.golosCasa == null) continue
+
+      // Get scorers if match finished and we don't have them yet
+      let marcadoresCasa = [...jogo.marcadoresCasa]
+      let marcadoresFora = [...jogo.marcadoresFora]
+
+      if (isFinished && marcadoresCasa.length === 0 && marcadoresFora.length === 0) {
+        try {
+          const keyEvents = await getEspnScorers(event.id)
+          for (const ke of keyEvents) {
+            if (!ke.scoringPlay || !ke.type.type.startsWith('goal')) continue
+            const scorer = ke.participants?.[0]?.athlete?.displayName
+            if (!scorer) continue
+            const teamName = ke.team?.displayName ?? ''
+            if (toPT(teamName) === equipaCasa) marcadoresCasa.push(scorer)
+            else marcadoresFora.push(scorer)
+          }
+        } catch { /* ignore */ }
+      }
+
+      await prisma.jogo.update({
+        where: { id: jogo.id },
+        data: {
+          golosCasa,
+          golosFora,
+          encerrado: isFinished,
+          marcadoresCasa,
+          marcadoresFora,
+        },
+      })
+    }
   }
 
+  await calcularPontosPendentes()
+  await calcularBonusGrupo()
+
+  return { fixtures: fichasProcessadas }
+}
+
+export async function calcularPontosLocalmente(): Promise<{ calculadas: number }> {
+  const calculadas = await calcularPontosPendentes()
+  await calcularBonusGrupo()
+  return { calculadas }
+}
+
+async function calcularPontosPendentes(): Promise<number> {
   const jogosFechados = await prisma.jogo.findMany({
     where: { encerrado: true },
     include: { previsoes: { where: { calculado: false } } },
   })
 
+  let total = 0
   for (const jogo of jogosFechados) {
     if (jogo.previsoes.length === 0) continue
-
-    const marcadoresCasa = [...jogo.marcadoresCasa]
-    const marcadoresFora = [...jogo.marcadoresFora]
-    if (marcadoresCasa.length === 0 && marcadoresFora.length === 0) {
-      try {
-        const eventsData = await getFixtureEvents(jogo.fixtureId)
-        const events = eventsData.response ?? []
-        const lineupData = await getFixtureLineups(jogo.fixtureId)
-        const lineups = lineupData.response ?? []
-
-        const homeTeamId = lineups[0]?.team?.id
-        for (const evt of events) {
-          if (evt.type === 'Goal' && evt.detail !== 'Missed Penalty') {
-            const name = evt.player?.name ?? ''
-            if (evt.team?.id === homeTeamId) marcadoresCasa.push(name)
-            else marcadoresFora.push(name)
-          }
-        }
-        await prisma.jogo.update({
-          where: { id: jogo.id },
-          data: { marcadoresCasa, marcadoresFora },
-        })
-      } catch { /* ignore event fetch errors */ }
-    }
-
-    const jogoComMarcadores = { ...jogo, marcadoresCasa, marcadoresFora }
+    if (jogo.golosCasa == null || jogo.golosFora == null) continue
 
     for (const previsao of jogo.previsoes) {
-      if (jogo.golosCasa == null || jogo.golosFora == null) continue
-      const jogoFinal = {
-        ...jogoComMarcadores,
+      const pontos = calcularPontuacaoJogo(previsao, {
+        ...jogo,
         golosCasa: jogo.golosCasa!,
         golosFora: jogo.golosFora!,
-      }
-      const pontos = calcularPontuacaoJogo(previsao, jogoFinal)
+      })
       await prisma.previsao.update({
         where: { id: previsao.id },
         data: { pontos, calculado: true },
       })
+      total++
     }
   }
-
-  await calcularBonusGrupo()
-
-  return { fixtures: fixtures.length }
+  return total
 }
 
 async function calcularBonusGrupo() {
@@ -112,10 +134,9 @@ async function calcularBonusGrupo() {
 
     const userIds = [...new Set(jogosGrupo.flatMap(j => j.previsoes.map(p => p.userId)))]
     for (const userId of userIds) {
-      const jaAplicado = jogosGrupo.every(j => {
-        const prev = j.previsoes.find(p => p.userId === userId)
-        return prev?.bonusGrupo === true
-      })
+      const jaAplicado = jogosGrupo.every(j =>
+        j.previsoes.find(p => p.userId === userId)?.bonusGrupo === true
+      )
       if (jaAplicado) continue
 
       let todosAcertados = true
@@ -123,10 +144,10 @@ async function calcularBonusGrupo() {
         const prev = jogo.previsoes.find(p => p.userId === userId)
         if (!prev || jogo.golosCasa == null || jogo.golosFora == null) { todosAcertados = false; break }
         if (!acertouResultado(prev, { golosCasa: jogo.golosCasa!, golosFora: jogo.golosFora! })) {
-          todosAcertados = false
-          break
+          todosAcertados = false; break
         }
       }
+
       if (todosAcertados) {
         for (const jogo of jogosGrupo) {
           const prev = jogo.previsoes.find(p => p.userId === userId)
