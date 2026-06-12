@@ -66,3 +66,52 @@ export async function entrarLigaViaForm(formData: FormData) {
   if (!codigo?.trim()) return { error: 'Code is required.' }
   return entrarLiga(codigo.trim())
 }
+
+export async function adicionarMembro(ligaId: string, userId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  const liga = await prisma.liga.findUnique({ where: { id: ligaId } })
+  if (!liga || liga.criadorId !== session.user.id) return { error: 'Permission denied.' }
+
+  const user = await prisma.user.findUnique({ where: { id: userId } })
+  if (!user) return { error: 'User not found.' }
+
+  const jaeMembro = await prisma.membroLiga.findUnique({
+    where: { userId_ligaId: { userId, ligaId } },
+  })
+  if (jaeMembro) return { error: 'User is already a member.' }
+
+  await prisma.membroLiga.create({ data: { userId, ligaId } })
+  revalidatePath(`/ligas/${ligaId}`)
+  return { success: true }
+}
+
+export async function renomearLiga(ligaId: string, nome: string, descricao: string | null) {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  const liga = await prisma.liga.findUnique({ where: { id: ligaId } })
+  if (!liga || liga.criadorId !== session.user.id) return { error: 'Permission denied.' }
+  if (!nome?.trim()) return { error: 'Name is required.' }
+
+  await prisma.liga.update({
+    where: { id: ligaId },
+    data: { nome: nome.trim(), descricao: descricao?.trim() || null },
+  })
+  revalidatePath(`/ligas/${ligaId}`)
+  return { success: true }
+}
+
+export async function apagarLiga(ligaId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { error: 'Not authenticated.' }
+
+  const liga = await prisma.liga.findUnique({ where: { id: ligaId } })
+  if (!liga || liga.criadorId !== session.user.id) return { error: 'Permission denied.' }
+
+  await prisma.membroLiga.deleteMany({ where: { ligaId } })
+  await prisma.liga.delete({ where: { id: ligaId } })
+  revalidatePath('/ligas')
+  redirect('/ligas')
+}

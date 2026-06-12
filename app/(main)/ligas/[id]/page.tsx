@@ -3,6 +3,9 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import { TabelaLeaderboard } from '@/components/leaderboard/TabelaLeaderboard'
 import { RemoverMembroBtn } from './RemoverMembroBtn'
+import { AdicionarMembroBtn } from './AdicionarMembroBtn'
+import { EditarLigaForm } from './EditarLigaForm'
+import { ApagarLigaBtn } from './ApagarLigaBtn'
 import { CopyButton } from './CopyButton'
 import Image from 'next/image'
 
@@ -31,7 +34,6 @@ export default async function LigaDetailPage({ params }: Props) {
   const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
   const linkConvite = `${baseUrl}/ligas/entrar/${liga.codigoConvite}`
 
-  // Leaderboard da liga
   const userIds = liga.membros.map(m => m.userId)
 
   const [pontosPorUser, totalPrevisoesPorUser] = await Promise.all([
@@ -60,7 +62,6 @@ export default async function LigaDetailPage({ params }: Props) {
   }
 
   const userMap = Object.fromEntries(liga.membros.map(m => [m.userId, m.user]))
-
   const pontosMap = Object.fromEntries(pontosPorUser.map(p => [p.userId, p._sum.pontos ?? 0]))
 
   const leaderboard = userIds
@@ -76,13 +77,21 @@ export default async function LigaDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-black">{liga.nome}</h1>
-        {liga.descricao && <p className="text-muted mt-1">{liga.descricao}</p>}
-        <p className="text-xs text-muted mt-1">Created by {liga.criador.nome}</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black">{liga.nome}</h1>
+          {liga.descricao && <p className="text-muted mt-1">{liga.descricao}</p>}
+          <p className="text-xs text-muted mt-1">Created by {liga.criador.nome}</p>
+        </div>
+        {isCriador && (
+          <div className="flex gap-2 shrink-0 flex-wrap justify-end">
+            <EditarLigaForm ligaId={liga.id} nomeInicial={liga.nome} descricaoInicial={liga.descricao} />
+            <ApagarLigaBtn ligaId={liga.id} nomeLiga={liga.nome} />
+          </div>
+        )}
       </div>
 
-      {/* Link de convite */}
+      {/* Invite link */}
       <div className="bg-surface rounded-xl border border-border p-4">
         <p className="text-xs text-muted mb-2">Invite link</p>
         <div className="flex items-center gap-2">
@@ -91,7 +100,6 @@ export default async function LigaDetailPage({ params }: Props) {
           </code>
           <CopyButton text={linkConvite} />
         </div>
-
         <p className="text-xs text-muted mt-1">
           Code: <span className="font-mono text-white font-bold">{liga.codigoConvite}</span>
         </p>
@@ -103,10 +111,13 @@ export default async function LigaDetailPage({ params }: Props) {
         <TabelaLeaderboard entradas={leaderboard} destaqueUserId={session.user.id} />
       </section>
 
-      {/* Membros (admin view) */}
+      {/* Members (owner view) */}
       {isCriador && (
-        <section>
-          <h2 className="font-bold text-lg mb-3">Members ({liga.membros.length})</h2>
+        <section className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="font-bold text-lg">Members ({liga.membros.length})</h2>
+            <AdicionarMembroBtn ligaId={liga.id} />
+          </div>
           <div className="space-y-2">
             {liga.membros.map(m => (
               <div key={m.id} className="bg-surface rounded-xl border border-border px-4 py-3 flex items-center justify-between">
@@ -134,4 +145,3 @@ export default async function LigaDetailPage({ params }: Props) {
     </div>
   )
 }
-

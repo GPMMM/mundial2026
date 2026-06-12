@@ -23,11 +23,13 @@ export async function registar(formData: FormData) {
 }
 
 export async function entrar(formData: FormData) {
+  const next = formData.get('next') as string | null
+  const redirectTo = next?.startsWith('/') ? next : '/'
   try {
     await signIn('credentials', {
       email: formData.get('email'),
       password: formData.get('password'),
-      redirectTo: '/',
+      redirectTo,
     })
   } catch (e) {
     if (e instanceof AuthError) return { error: 'Invalid credentials.' }

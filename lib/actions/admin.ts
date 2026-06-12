@@ -2,19 +2,19 @@
 
 import { auth } from '../auth'
 import { revalidatePath } from 'next/cache'
+import { runSync } from '../sync'
 
 export async function forceSyncAction() {
   const session = await auth()
   if (session?.user?.role !== 'ADMIN') return { error: 'Permission denied.' }
 
-  const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000'
-  const res = await fetch(`${baseUrl}/api/cron/sync`, {
-    headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
-  })
-
-  if (!res.ok) return { error: 'Sync error.' }
-  revalidatePath('/')
-  return { success: true }
+  try {
+    const result = await runSync()
+    revalidatePath('/')
+    return { success: true, ...result }
+  } catch (err) {
+    return { error: String(err) }
+  }
 }
 
 export async function alterarRole(userId: string, role: 'USER' | 'ADMIN') {
